@@ -76,7 +76,7 @@ function getLabelWidth(axis, svg) {
 }
 
 var viz = function($element, layout, _this) {
-  var id = senseUtils.setupContainer($element,layout,"d3vl_two_dim_scatter"),
+  var id = senseUtils.setupContainer($element,layout,"scatter"),
     ext_width = $element.width(),
     ext_height = $element.height(),
     classDim = layout.qHyperCube.qDimensionInfo[0].qFallbackTitle.replace(/\s+/g, '-');    
@@ -113,7 +113,6 @@ var viz = function($element, layout, _this) {
   var svg = d3.select("#" + id).append("svg")
       .attr("width", width + margin.left + margin.right)
       .attr("height", height + margin.top + margin.bottom);
-  
 
   var label_width = getLabelWidth(yAxis,svg); 
   // Update the margins, plot width, and x scale range based on the label size
