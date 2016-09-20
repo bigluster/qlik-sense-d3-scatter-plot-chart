@@ -1,0 +1,34 @@
+.highlight {
+  stroke-width: 2.5 !important;
+  stroke: red !important;
+  border: solid 2.5px red !important;
+  /*fill: #4682B4 !important;*/
+  opacity: 1 !important;
+  transition: stroke 250ms;
+  transition: stroke-width 250ms;
+  transition: border 250ms;
+  transition: opacity 250ms;
+}
+
+.dim {
+  opacity: 0.4;
+  transition: opacity 250ms;
+}
+
+.d3vl_two_dim_scatter {
+  font: 11px sans-serif;
+}
+
+.d3vl_two_dim_scatter .axis path,
+.d3vl_two_dim_scatter .axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.axisLine {
+  fill: none;
+  shape-rendering: crispEdges;
+  stroke: rgba(0, 0, 0, 0.5);
+  stroke-width: 2px;
+}
