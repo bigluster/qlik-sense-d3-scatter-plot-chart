@@ -22,6 +22,6 @@
 .scatter .axis path,
 .scatter .axis line {
   fill: none;
-  stroke: rgba(0, 0, 0, 0.2);
+  stroke: rgba(0, 0, 0, 0.1);
   shape-rendering: crispEdges;
 }

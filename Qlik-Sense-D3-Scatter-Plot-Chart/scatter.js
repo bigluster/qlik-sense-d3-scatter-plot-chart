@@ -102,12 +102,13 @@ var viz = function($element, layout, _this) {
   var xAxis = d3.svg.axis()
       .scale(x)
       .orient("bottom")
+      .tickSize(-height)
       .tickFormat(d3.format(".2s"));
       
 
   var yAxis = d3.svg.axis()
       .scale(y)
-      .orient("left")
+      .orient("left")          
       .tickFormat(d3.format(".2s"));
 
   var svg = d3.select("#" + id).append("svg")
@@ -119,6 +120,7 @@ var viz = function($element, layout, _this) {
   margin.left = margin.left + label_width;
   width = ext_width - margin.left - margin.right;
   x.range([0, width]);
+  yAxis.tickSize(-width);
 
   var plot = svg.append("g")
       .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
@@ -130,7 +132,7 @@ var viz = function($element, layout, _this) {
         .append("text")
         .attr("class", "label")
         .attr("x", width)
-        .attr("y", -6)
+        .attr("y", margin.bottom - 20)
         .style("text-anchor", "end")
         .text(senseUtils.getMeasureLabel(1,layout));
 
@@ -140,7 +142,7 @@ var viz = function($element, layout, _this) {
         .append("text")
         .attr("class", "label")
         .attr("transform", "rotate(-90)")
-        .attr("y", 6)
+        .attr("y", -margin.left + 25)
         .attr("dy", ".71em")
         .style("text-anchor", "end")
         .text(senseUtils.getMeasureLabel(2,layout));
@@ -177,22 +179,13 @@ var viz = function($element, layout, _this) {
 
     legend.append("circle")
         .attr("r", 5)
-        .attr("cx", width + 20)
+        .attr("cx", width + 25)
         .attr("fill", color);
-        //.attr("x", width - 18)
-        //.attr("width", 18)
-        //.attr("height", 18)
-        //.style("fill", color);
 
     legend.append("text")
-        .attr("x", width + 26)
+        .attr("x", width + 32)
         .attr("dy", ".35em")
-        .text(function(d) { return d; });
-        // .attr("x", width - 24)
-        // .attr("y", 9)
-        // .attr("dy", ".35em")
-        // .style("text-anchor", "end")
-        // .text(function(d) { return d; }); 
+        .text(function(d) { return d; }); 
 
     
 }
