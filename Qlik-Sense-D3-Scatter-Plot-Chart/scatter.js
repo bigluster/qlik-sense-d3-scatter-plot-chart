@@ -85,10 +85,7 @@ var viz = function($element, layout, _this) {
     var yMax2 = yMin == yMax ? yMax*1.5 : yMax;
    
      x.domain([xMin2, xMax2]).nice();
-     y.domain([yMin2, yMax2]).nice();
-
-    //x.domain(d3.extent(data, function(d) { return d.measure(1).qNum; })).nice();
-    //y.domain(d3.extent(data, function(d) { return d.measure(2).qNum; })).nice(); 
+     y.domain([yMin2, yMax2]).nice();    
    
   var color = d3.scale.category20();
 
@@ -96,7 +93,7 @@ var viz = function($element, layout, _this) {
       .scale(x)
       .orient("bottom")
       .tickSize(-height)
-      .tickFormat(d3.format(".2s"));      
+      .tickFormat(d3.format(".2s")); 
 
   var yAxis = d3.svg.axis()
       .scale(y)
@@ -104,51 +101,67 @@ var viz = function($element, layout, _this) {
       .tickSize(-width)       
       .tickFormat(d3.format(".2s"));
 
-  var svg = d3.select("#" + id)
+  var zoomBeh = d3.behavior.zoom()
+      .x(x)
+      .y(y)
+      .scaleExtent([0, 500])
+      .on("zoom", zoom);
+
+   var button = d3.select("#" + id) 
+      .append("input")
+      .attr("type", "button")
+      .attr("name", "reset")
+      .attr("value", "Reset Zoom")
+      .attr("float", "left"); 
+
+  var svg = d3.select("#" + id)    
     .append("svg")
       .attr("width", width + margin.left + margin.right)
       .attr("height", height + margin.top + margin.bottom)
     .append("g")
-     .attr("transform", "translate(" + margin.left + "," + margin.top + ")"); 
+     .attr("transform", "translate(" + margin.left + "," + margin.top + ")") 
+     .call(zoomBeh);
+
+  svg.append("rect")
+    .attr("width", width)
+    .attr("height", height);
 
   svg.append("g")
-        .attr("class", "x axis")
-        .attr("transform", "translate(0," + height + ")")
-        .call(xAxis)
-        .append("text")
-        .attr("class", "label")
-        .attr("x", width)
-        .attr("y", margin.bottom - 10)
-        .style("text-anchor", "end")
-        .text(senseUtils.getMeasureLabel(1,layout));
+    .attr("class", "x axis")
+    .attr("transform", "translate(0," + height + ")")
+    .call(xAxis)
+    .append("text")
+    .attr("class", "label")
+    .attr("x", width)
+    .attr("y", margin.bottom - 10)
+    .style("text-anchor", "end")
+    .text(senseUtils.getMeasureLabel(1,layout));
 
   svg.append("g")
-        .attr("class", "y axis")
-        .call(yAxis)
-        .append("text")
-        .attr("class", "label")
-        .attr("transform", "rotate(-90)")
-        .attr("y", -margin.left)
-        .attr("dy", ".71em")
-        .style("text-anchor", "end")
-        .text(senseUtils.getMeasureLabel(2,layout));
-
-
+    .attr("class", "y axis")
+    .call(yAxis)
+    .append("text")
+    .attr("class", "label")
+    .attr("transform", "rotate(-90)")
+    .attr("y", -margin.left)
+    .attr("dy", ".71em")
+    .style("text-anchor", "end")
+    .text(senseUtils.getMeasureLabel(2,layout));  
 
   var plot = svg.append("svg")
     .classed("objects", true)
       .attr("width", width)
-      .attr("height", height);
-    
+      .attr("height", height);    
 
     plot.selectAll(".dot")
         .data(data)
       .enter().append("circle")
         .attr("class", "dot "+classDim)
+        .attr("transform", transform)
         .attr("id", function(d) { return d.dim(1).qText.replace(/[^A-Z0-9]+/ig, "-"); })
         .attr("r", function(d) { return d.measure(3).qNum; })
-        .attr("cx", function(d) { return x(d.measure(1).qNum); })
-        .attr("cy", function(d) { return y(d.measure(2).qNum); })
+        //.attr("cx", function(d) { return x(d.measure(1).qNum); })
+        //.attr("cy", function(d) { return y(d.measure(2).qNum); })
         .style("fill", function(d) { return color(d.dim(1).qText); })
         .on("click", function(d) {d.dim(1).qSelect();})
         .on("mouseover", function(d){
@@ -163,13 +176,15 @@ var viz = function($element, layout, _this) {
             .html(function(d) {return senseUtils.getDimLabel(1,layout) + ": " + d.dim(1).qText 
                     + "<br/>" + senseUtils.getMeasureLabel(1,layout) + ": " + d.measure(1).qText
                     + "<br/>" + senseUtils.getMeasureLabel(2,layout) + ": " + d.measure(2).qText
+                    + "<br/>" + senseUtils.getMeasureLabel(3,layout) + " (Bubble): " + d.measure(3).qText
                       });
     
      var legend = svg.selectAll(".legend")
         .data(color.domain())
         .enter().append("g")
         .attr("class", "legend")
-        .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
+        .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });           
+    
 
     legend.append("circle")
         .attr("r", 5)
@@ -179,7 +194,41 @@ var viz = function($element, layout, _this) {
     legend.append("text")
         .attr("x", width + 32)
         .attr("dy", ".35em")
-        .text(function(d) { return d; }); 
+        .text(function(d) { return d; });
 
-    
+    d3.select("input").on("click", change);
+
+    function change() {
+      
+      var xMax3 = d3.max(data, function(d) { return d.measure(1).qNum; })*1.02;
+      var xMin3 = d3.min(data, function(d) { return d.measure(1).qNum; })*0.98;
+      var yMax3 = d3.max(data, function(d) { return d.measure(2).qNum; })*1.02;
+      var yMin3 = d3.min(data, function(d) { return d.measure(2).qNum; })*0.98;
+
+      
+      zoomBeh
+        .x(x.domain([xMin3, xMax3]).nice())
+        .y(y.domain([yMin3, yMax3]).nice());
+
+      var svg = d3.select("#" + id).transition();
+
+      svg.select(".x.axis").duration(750).call(xAxis).select(".label").text(senseUtils.getMeasureLabel(1,layout));
+      svg.select(".y.axis").duration(750).call(yAxis).select(".label").text(senseUtils.getMeasureLabel(2,layout));
+
+      plot.selectAll(".dot").transition().duration(1000).attr("transform", transform);
+    }
+
+    function zoom() {
+      svg.select(".x.axis").call(xAxis);
+      svg.select(".y.axis").call(yAxis);
+
+      svg.selectAll(".dot")
+          .attr("transform", transform);
+    }
+
+    function transform(d) {    
+      
+      return "translate(" + x(d.measure(1).qNum) + "," + y(d.measure(2).qNum) + ")";
+
+    }
 }
