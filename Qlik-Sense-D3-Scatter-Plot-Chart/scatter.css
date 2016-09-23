@@ -1,3 +1,8 @@
+rect {
+  fill: transparent;
+  shape-rendering: crispEdges;
+}
+
 .highlight {
   stroke-width: 2.5 !important;
   stroke: red !important;
@@ -16,7 +21,7 @@
 }
 
 .scatter {
-  font: 11px sans-serif;
+  font: 12px sans-serif;
 }
 
 .scatter .axis path,
@@ -25,3 +30,8 @@
   stroke: rgba(0, 0, 0, 0.1);
   shape-rendering: crispEdges;
 }
+
+.dot {
+  fill-opacity: .8;
+}
+

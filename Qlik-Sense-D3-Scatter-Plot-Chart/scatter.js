@@ -56,24 +56,6 @@ define(["jquery", "text!./scatter.css","./d3.v3.min", "./scatterUtils"], functio
     };
 });
 
-// Helper functions
-function getLabelWidth(axis, svg) {
-  // Create a temporary yAxis to get the width needed for labels and add to the margin
-  svg.append("g")
-    .attr("class", "y axis temp")
-    .attr("transform", "translate(0," + 0 + ")")
-    .call(axis);
-
-  // Get the temp axis max label width
-  var label_width = d3.max(svg.selectAll(".y.axis.temp text")[0], function(d) {
-    return d.clientWidth
-  });
-
-  // Remove the temp axis
-  svg.selectAll(".y.axis.temp").remove();
-
-  return label_width;
-}
 
 var viz = function($element, layout, _this) {
   var id = senseUtils.setupContainer($element,layout,"scatter"),
@@ -87,15 +69,26 @@ var viz = function($element, layout, _this) {
       width = ext_width - margin.left - margin.right,
       height = ext_height - margin.top - margin.bottom;
 
-  var x = d3.scale.linear();
-
+  var x = d3.scale.linear()
+      .range([0, width]);
   var y = d3.scale.linear()
       .range([height, 0]);
 
+  var xMax = d3.max(data, function(d) { return d.measure(1).qNum; })*1.02,
+    xMin = d3.min(data, function(d) { return d.measure(1).qNum; })*0.98,
+    yMax = d3.max(data, function(d) { return d.measure(2).qNum; })*1.02,
+    yMin = d3.min(data, function(d) { return d.measure(2).qNum; })*0.98;
+    
+    var xMin2 = xMin == xMax ? xMin*0.5 : xMin;
+    var xMax2 = xMin == xMax ? xMax*1.5 : xMax;
+    var yMin2 = yMin == yMax ? yMin*0.5 : yMin;
+    var yMax2 = yMin == yMax ? yMax*1.5 : yMax;
+   
+     x.domain([xMin2, xMax2]).nice();
+     y.domain([yMin2, yMax2]).nice();
 
-    x.domain(d3.extent(data, function(d) { return d.measure(1).qNum; })).nice();
-    y.domain(d3.extent(data, function(d) { return d.measure(2).qNum; })).nice(); 
-
+    //x.domain(d3.extent(data, function(d) { return d.measure(1).qNum; })).nice();
+    //y.domain(d3.extent(data, function(d) { return d.measure(2).qNum; })).nice(); 
    
   var color = d3.scale.category20();
 
@@ -103,49 +96,50 @@ var viz = function($element, layout, _this) {
       .scale(x)
       .orient("bottom")
       .tickSize(-height)
-      .tickFormat(d3.format(".2s"));
-      
+      .tickFormat(d3.format(".2s"));      
 
   var yAxis = d3.svg.axis()
       .scale(y)
-      .orient("left")          
+      .orient("left")  
+      .tickSize(-width)       
       .tickFormat(d3.format(".2s"));
 
-  var svg = d3.select("#" + id).append("svg")
+  var svg = d3.select("#" + id)
+    .append("svg")
       .attr("width", width + margin.left + margin.right)
-      .attr("height", height + margin.top + margin.bottom);
+      .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+     .attr("transform", "translate(" + margin.left + "," + margin.top + ")"); 
 
-  var label_width = getLabelWidth(yAxis,svg); 
-  // Update the margins, plot width, and x scale range based on the label size
-  margin.left = margin.left + label_width;
-  width = ext_width - margin.left - margin.right;
-  x.range([0, width]);
-  yAxis.tickSize(-width);
-
-  var plot = svg.append("g")
-      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-    plot.append("g")
+  svg.append("g")
         .attr("class", "x axis")
         .attr("transform", "translate(0," + height + ")")
         .call(xAxis)
         .append("text")
         .attr("class", "label")
         .attr("x", width)
-        .attr("y", margin.bottom - 20)
+        .attr("y", margin.bottom - 10)
         .style("text-anchor", "end")
         .text(senseUtils.getMeasureLabel(1,layout));
 
-    plot.append("g")
+  svg.append("g")
         .attr("class", "y axis")
         .call(yAxis)
         .append("text")
         .attr("class", "label")
         .attr("transform", "rotate(-90)")
-        .attr("y", -margin.left + 25)
+        .attr("y", -margin.left)
         .attr("dy", ".71em")
         .style("text-anchor", "end")
         .text(senseUtils.getMeasureLabel(2,layout));
+
+
+
+  var plot = svg.append("svg")
+    .classed("objects", true)
+      .attr("width", width)
+      .attr("height", height);
+    
 
     plot.selectAll(".dot")
         .data(data)
@@ -171,7 +165,7 @@ var viz = function($element, layout, _this) {
                     + "<br/>" + senseUtils.getMeasureLabel(2,layout) + ": " + d.measure(2).qText
                       });
     
-     var legend = plot.selectAll(".legend")
+     var legend = svg.selectAll(".legend")
         .data(color.domain())
         .enter().append("g")
         .attr("class", "legend")
