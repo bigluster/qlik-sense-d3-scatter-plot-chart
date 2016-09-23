@@ -10,3 +10,13 @@ http://bl.ocks.org/peterssonjonas/4a0e7cb8d23231243e0e
 
 Based on this Qlik Extension:
 http://branch.qlik.com/#!project/56728f52d1e497241ae697f7
+
+Requirements:
+
+ - 1 dimension
+ - 3 Measures
+
+Features:
+
+ - Zoomable
+ - Bubles are clickable to make selections
